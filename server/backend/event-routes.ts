@@ -4,7 +4,7 @@ import express from "express";
 import { Request, Response } from "express";
 
 // some useful database functions in here:
-import {
+import db, {
 } from "./database";
 import { Event, weeklyRetentionObject } from "../../client/src/models/event";
 import { ensureAuthenticated, validateMiddleware } from "./helpers";
@@ -27,9 +27,9 @@ interface Filter {
   offset: number;
 }
 
-router.get('/all', (req: Request, res: Response) => {
-  res.send('/all')
-    
+router.get("/all", (req: Request, res: Response) => {
+  const events: Event[] = db.get("events").value();
+  res.send(events);
 });
 
 router.get('/all-filtered', (req: Request, res: Response) => {
