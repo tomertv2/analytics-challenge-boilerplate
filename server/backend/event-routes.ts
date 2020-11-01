@@ -15,6 +15,7 @@ import {
   userFieldsValidator,
   isUserValidator,
 } from "./validators";
+import { check } from "prettier";
 const router = express.Router();
 
 // Routes
@@ -32,8 +33,33 @@ router.get("/all", (req: Request, res: Response) => {
   res.send(events);
 });
 
-router.get('/all-filtered', (req: Request, res: Response) => {
-  res.send('/all-filtered')
+router.get("/all-filtered", (req: Request, res: Response) => {
+  const qFilter = req.query;
+  let filteredEvents = db.get("events");
+  let checkOffset: boolean = false;
+  if (qFilter.sorting) {
+    if (qFilter.sorting === "+date") {
+      filteredEvents = filteredEvents.sortBy("date");
+    } else if (qFilter.sorting === "-date") {
+      filteredEvents = filteredEvents.sortBy("date").reverse();
+    }
+  }
+  if (qFilter.type) {
+    filteredEvents = filteredEvents.filter({ name: qFilter.type });
+  }
+  if (qFilter.browser) {
+    filteredEvents = filteredEvents.filter({ browser: qFilter.browser });
+  }
+  if (qFilter.search) {
+  }
+  if (qFilter.offset) {
+    const originalLength: number = filteredEvents.value().length;
+    filteredEvents = filteredEvents.take(Number(qFilter.offset));
+    if (originalLength > filteredEvents.value().length) {
+      checkOffset = true;
+    }
+  }
+  res.send({ events: filteredEvents.value(), more: checkOffset });
 });
 
 router.get('/by-days/:offset', (req: Request, res: Response) => {
