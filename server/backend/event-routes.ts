@@ -16,6 +16,7 @@ import {
   isUserValidator,
 } from "./validators";
 import { check } from "prettier";
+import { session } from "passport";
 const router = express.Router();
 
 // Routes
@@ -54,7 +55,7 @@ router.get("/all-filtered", (req: Request, res: Response) => {
   }
   if (qFilter.offset) {
     const originalLength: number = filteredEvents.value().length;
-    filteredEvents = filteredEvents.take(Number(qFilter.offset));
+    filteredEvents = filteredEvents.take(+qFilter.offset);
     if (originalLength > filteredEvents.value().length) {
       checkOffset = true;
     }
@@ -62,8 +63,52 @@ router.get("/all-filtered", (req: Request, res: Response) => {
   res.send({ events: filteredEvents.value(), more: checkOffset });
 });
 
-router.get('/by-days/:offset', (req: Request, res: Response) => {
-  res.send('/by-days/:offset')
+router.get("/by-days/:offset", (req: Request, res: Response) => {
+  function getStartOfDay(dateNow: number): number {
+    let year = new Date(dateNow).getFullYear();
+    let day = new Date(dateNow).getDate();
+    let month = new Date(dateNow).getMonth() + 1;
+    const startOfDay = new Date(`${year}/${month}/${day}`);
+    return startOfDay.getTime();
+  }
+  type returnObj = {
+    date: string;
+    count: number;
+  };
+  const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
+  const weekInMilliseconds: number = 1000 * 60 * 60 * 24 * 7;
+  const offset: number = +req.params.offset;
+  // Check the date before 'offset' days
+  const dateToStart: number =
+    getStartOfDay(Date.now() + dayInMilliseconds) - offset * dayInMilliseconds;
+  // Check the date before a week
+  const dateBeforeWeek: number = getStartOfDay(dateToStart) - weekInMilliseconds;
+  const eventsByDays: Event[] = db
+    .get("events")
+    // Filter the events in the correct dates
+    .filter((e: Event) => e.date <= dateToStart && e.date >= dateBeforeWeek)
+    .value();
+  const eventsDates: { date: number; sessionId: string }[] = eventsByDays.map((e) => ({
+    date: e.date,
+    sessionId: e.session_id,
+  }));
+  const returnArr: returnObj[] = [];
+  for (let i = 0; i < eventsDates.length; i++) {
+    let isExist: boolean = false;
+    for (let j = 0; j < returnArr.length; j++) {
+      if (new Date(eventsDates[i].date).toLocaleDateString() === returnArr[j].date) {
+        returnArr[j].count++;
+        isExist = true;
+      }
+    }
+    if (!isExist) {
+      returnArr[returnArr.length] = {
+        date: new Date(eventsDates[i].date).toLocaleDateString(),
+        count: 1,
+      };
+    }
+  }
+  res.send(returnArr);
 });
 
 router.get('/by-hours/:offset', (req: Request, res: Response) => {
