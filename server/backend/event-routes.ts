@@ -76,7 +76,7 @@ router.get("/by-days/:offset", (req: Request, res: Response) => {
     date: string;
     count: number;
   };
-  
+
   const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
   const weekInMilliseconds: number = 1000 * 60 * 60 * 24 * 7;
   const offset: number = +req.params.offset;
@@ -261,8 +261,12 @@ router.get('/:eventId',(req : Request, res : Response) => {
   res.send('/:eventId')
 });
 
-router.post('/', (req: Request, res: Response) => {
-  res.send('/')
+router.post("/", (req: Request, res: Response) => {
+  const newEvent: Event = req.body;
+  db.get("events")
+    .push({ ...newEvent })
+    .write();
+  res.send(newEvent);
 });
 
 router.get('/chart/os/:time',(req: Request, res: Response) => {
