@@ -71,10 +71,12 @@ router.get("/by-days/:offset", (req: Request, res: Response) => {
     const startOfDay = new Date(`${year}/${month}/${day}`);
     return startOfDay.getTime();
   }
+
   type returnObj = {
     date: string;
     count: number;
   };
+  
   const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
   const weekInMilliseconds: number = 1000 * 60 * 60 * 24 * 7;
   const offset: number = +req.params.offset;
@@ -88,31 +90,159 @@ router.get("/by-days/:offset", (req: Request, res: Response) => {
     // Filter the events in the correct dates
     .filter((e: Event) => e.date <= dateToStart && e.date >= dateBeforeWeek)
     .value();
+
   const eventsDates: { date: number; sessionId: string }[] = eventsByDays.map((e) => ({
     date: e.date,
     sessionId: e.session_id,
   }));
-  const returnArr: returnObj[] = [];
+
+  const byDaysArr: returnObj[] = [];
   for (let i = 0; i < eventsDates.length; i++) {
     let isExist: boolean = false;
-    for (let j = 0; j < returnArr.length; j++) {
-      if (new Date(eventsDates[i].date).toLocaleDateString() === returnArr[j].date) {
-        returnArr[j].count++;
+    for (let j = 0; j < byDaysArr.length; j++) {
+      if (new Date(eventsDates[i].date).toLocaleDateString() === byDaysArr[j].date) {
+        byDaysArr[j].count++;
         isExist = true;
       }
     }
     if (!isExist) {
-      returnArr[returnArr.length] = {
+      byDaysArr[byDaysArr.length] = {
         date: new Date(eventsDates[i].date).toLocaleDateString(),
         count: 1,
       };
     }
   }
-  res.send(returnArr);
+  res.send(byDaysArr);
 });
 
-router.get('/by-hours/:offset', (req: Request, res: Response) => {
-  res.send('/by-hours/:offset')
+router.get("/by-hours/:offset", (req: Request, res: Response) => {
+  type returnObj = {
+    hour: string;
+    count: number;
+  };
+
+  const offset: number = +req.params.offset;
+  const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
+  const chosenDate: Date = new Date(Date.now() - offset * dayInMilliseconds);
+  const chosenDay: number = chosenDate.getDate();
+  const chosenMonth: number = chosenDate.getMonth();
+  const chosenYear: number = chosenDate.getFullYear();
+  const eventsByHours: Event[] = db
+    .get("events")
+    // filter by day
+    .filter((e) => new Date(e.date).getDate() === chosenDay)
+    // filter by month
+    .filter((e) => new Date(e.date).getMonth() === chosenMonth)
+    // filter by year
+    .filter((e) => new Date(e.date).getFullYear() === chosenYear)
+    // sort by date
+    .sortBy("date")
+    .value();
+
+  const byHoursArr: returnObj[] = [
+    {
+      hour: "00:00",
+      count: 0,
+    },
+    {
+      hour: "01:00",
+      count: 0,
+    },
+    {
+      hour: "02:00",
+      count: 0,
+    },
+    {
+      hour: "03:00",
+      count: 0,
+    },
+    {
+      hour: "04:00",
+      count: 0,
+    },
+    {
+      hour: "05:00",
+      count: 0,
+    },
+    {
+      hour: "06:00",
+      count: 0,
+    },
+    {
+      hour: "07:00",
+      count: 0,
+    },
+    {
+      hour: "08:00",
+      count: 0,
+    },
+    {
+      hour: "09:00",
+      count: 0,
+    },
+    {
+      hour: "10:00",
+      count: 0,
+    },
+    {
+      hour: "11:00",
+      count: 0,
+    },
+    {
+      hour: "12:00",
+      count: 0,
+    },
+    {
+      hour: "13:00",
+      count: 0,
+    },
+    {
+      hour: "14:00",
+      count: 0,
+    },
+    {
+      hour: "15:00",
+      count: 0,
+    },
+    {
+      hour: "16:00",
+      count: 0,
+    },
+    {
+      hour: "17:00",
+      count: 0,
+    },
+    {
+      hour: "18:00",
+      count: 0,
+    },
+    {
+      hour: "19:00",
+      count: 0,
+    },
+    {
+      hour: "20:00",
+      count: 0,
+    },
+    {
+      hour: "21:00",
+      count: 0,
+    },
+    {
+      hour: "22:00",
+      count: 0,
+    },
+    {
+      hour: "23:00",
+      count: 0,
+    },
+  ];
+
+  for (let i = 0; i < eventsByHours.length; i++) {
+    const temp: number = new Date(eventsByHours[i].date).getHours();
+    byHoursArr[temp].count++;
+  }
+  res.send(byHoursArr);
 });
 
 router.get('/today', (req: Request, res: Response) => {
