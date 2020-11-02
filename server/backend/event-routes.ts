@@ -52,6 +52,8 @@ router.get("/all-filtered", (req: Request, res: Response) => {
     filteredEvents = filteredEvents.filter({ browser: qFilter.browser });
   }
   if (qFilter.search) {
+    const searchRegex: RegExp = RegExp(qFilter.search, 'ig');
+    filteredEvents = filteredEvents.filter(e => Object.values(e).find(value => searchRegex.test(value)));
   }
   if (qFilter.offset) {
     const originalLength: number = filteredEvents.value().length;
