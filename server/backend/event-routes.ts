@@ -52,8 +52,10 @@ router.get("/all-filtered", (req: Request, res: Response) => {
     filteredEvents = filteredEvents.filter({ browser: qFilter.browser });
   }
   if (qFilter.search) {
-    const searchRegex: RegExp = RegExp(qFilter.search, 'ig');
-    filteredEvents = filteredEvents.filter(e => Object.values(e).find(value => searchRegex.test(value)));
+    const searchRegex: RegExp = RegExp(qFilter.search, "ig");
+    filteredEvents = filteredEvents.filter((e) =>
+      Object.values(e).find((value) => searchRegex.test(value))
+    );
   }
   if (qFilter.offset) {
     const originalLength: number = filteredEvents.value().length;
@@ -255,10 +257,31 @@ router.get('/week', (req: Request, res: Response) => {
   res.send('/week')
 });
 
-router.get('/retention', (req: Request, res: Response) => {
-  const {dayZero} = req.query
-  res.send('/retention')
+router.get("/retention", (req: Request, res: Response) => {
+  let dayZero: number = +req.query.dayZero;
+  dayZero = new Date(dayZero).setHours(0, 0, 0, 0);
+  const today: number = new Date().setHours(0, 0, 0, 0);
+  const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
+  const weekInMilliseconds: number = 1000 * 60 * 60 * 24 * 7;
+  const events: Event[] = db
+    .get("events")
+    .filter((e) => e.date < today && e.date < dayZero)
+    .value();
+  const weeks: number[] = [dayZero];
+  for (let i = dayZero + weekInMilliseconds; i <= today; i += weekInMilliseconds) {
+    if (new Date(i).getHours() != 0) {
+      weeks.push(new Date(i + dayInMilliseconds).setHours(0,0,0,0));
+    } else {
+      weeks.push(new Date(i).getTime());
+    }
+  }
+  const weekEvents = weeks.map((week, i) => {
+    const weekEvents2 = events.filter(e => e.date >= week && e.date < weeks[i + 1]);
+    return weekEvents2;
+  })
+  console.log(weekEvents);
 });
+
 router.get('/:eventId',(req : Request, res : Response) => {
   res.send('/:eventId')
 });
