@@ -93,6 +93,7 @@ router.get("/by-days/:offset", (req: Request, res: Response) => {
     .get("events")
     // Filter the events in the correct dates
     .filter((e: Event) => e.date <= dateToStart && e.date >= dateBeforeWeek)
+    .sortBy("date")
     .value();
 
   const eventsDates: { date: number; sessionId: string }[] = eventsByDays.map((e) => ({
