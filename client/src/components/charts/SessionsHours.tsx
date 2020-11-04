@@ -7,7 +7,6 @@ const SessionsHours: React.FC = () => {
 
     const [sessions, setSessions] = useState([]);
     const [firstDate, setFirstDate] = useState<Date>(new Date());
-    const [secondDate, setSecondDate] = useState<Date>(new Date(Date.now() - dayInMilliseconds));
 
   useEffect(() => {
     const fetchData = async () => {
