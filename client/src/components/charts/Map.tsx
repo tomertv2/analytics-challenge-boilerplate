@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
-import { Event, GeoLocation } from "../../models/event";
+import { GoogleMap, LoadScript, Marker, MarkerClusterer } from "@react-google-maps/api";
+import { Event, GeoLocation } from "models";
 import axios from "axios";
 
 const containerStyle: {
@@ -25,10 +25,14 @@ export default function Map() {
     lng: -180,
   };
 
+  const options : {imagePath: string} = {
+    imagePath:
+      'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+  }
+
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
       const { data: eventsLocations } = await axios.get(`http://localhost:3001/events/all`);
-      console.log(eventsLocations.map((e: Event) => e.geolocation));
       setLocationsData(eventsLocations.map((e: Event) => e.geolocation));
     };
     fetchData();
@@ -47,6 +51,7 @@ export default function Map() {
 
   return (
     <div>
+      <h1>Events on map</h1>
       <LoadScript googleMapsApiKey="AIzaSyD6fexKCtUQ5zLj2TEaOkf_EQstH0qLu-k">
         <GoogleMap
           mapContainerStyle={containerStyle}
@@ -55,9 +60,13 @@ export default function Map() {
           onLoad={onLoad}
           onUnmount={onUnmount}
         >
-          {locationsData.map((location: GeoLocation) => (
-            <Marker position={location.location} />
-          ))}
+            <MarkerClusterer options={options}>
+          {(clusterer) =>
+            locationsData.map((location: GeoLocation, i: number) => (
+                <Marker key={i} position={location.location} clusterer={clusterer} />
+              ))
+          }
+            </MarkerClusterer>
         </GoogleMap>
       </LoadScript>
     </div>

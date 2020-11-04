@@ -13,7 +13,6 @@ const SessionsHours: React.FC = () => {
       const offset: number = Math.ceil(
         (new Date().setHours(0, 0, 0, 0) - firstDate.getTime()) / dayInMilliseconds
       );
-      console.log(offset);
       const { data: sessionByDay } = await axios.get(
         `http://localhost:3001/events/by-hours/${offset}`
       );
@@ -32,7 +31,6 @@ const SessionsHours: React.FC = () => {
   };
 
   const handleDateChange = (newDate: string): void => {
-    console.log(newDate);
     setFirstDate(new Date(newDate));
   };
 

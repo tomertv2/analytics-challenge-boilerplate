@@ -4,6 +4,7 @@ import { AuthMachineContext, AuthMachineEvents } from "../machines/authMachine";
 import SessionsDays from "../components/charts/SessionsDays";
 import SessionsHours from "../components/charts/SessionsHours";
 import Map from '../components/charts/Map';
+import Log from '../components/charts/Log';
 
 export interface Props {
   authService: Interpreter<AuthMachineContext, any, AuthMachineEvents, any>;
@@ -16,6 +17,7 @@ const DashBoard: React.FC = () => {
       <SessionsDays />
       <SessionsHours />
       <Map />
+      <Log />
     </div>
   );
 };
