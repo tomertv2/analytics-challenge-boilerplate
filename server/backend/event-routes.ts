@@ -4,8 +4,7 @@ import express from "express";
 import { Request, Response } from "express";
 
 // some useful database functions in here:
-import db, {
-} from "./database";
+import db from "./database";
 import { Event, weeklyRetentionObject } from "../../client/src/models/event";
 import { ensureAuthenticated, validateMiddleware } from "./helpers";
 
@@ -82,7 +81,7 @@ router.get("/by-days/:offset", (req: Request, res: Response) => {
   };
 
   const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
-  const weekInMilliseconds: number = 1000 * 60 * 60 * 24 * 7;
+  const weekInMilliseconds: number = dayInMilliseconds * 7;
   const offset: number = +req.params.offset;
   // Check the date before 'offset' days
   const dateToStart: number =
@@ -250,12 +249,12 @@ router.get("/by-hours/:offset", (req: Request, res: Response) => {
   res.send(byHoursArr);
 });
 
-router.get('/today', (req: Request, res: Response) => {
-  res.send('/today')
+router.get("/today", (req: Request, res: Response) => {
+  res.send("/today");
 });
 
-router.get('/week', (req: Request, res: Response) => {
-  res.send('/week')
+router.get("/week", (req: Request, res: Response) => {
+  res.send("/week");
 });
 
 router.get("/retention", (req: Request, res: Response) => {
@@ -263,28 +262,80 @@ router.get("/retention", (req: Request, res: Response) => {
   dayZero = new Date(dayZero).setHours(0, 0, 0, 0);
   const today: number = new Date().setHours(0, 0, 0, 0);
   const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
-  const weekInMilliseconds: number = 1000 * 60 * 60 * 24 * 7;
+  const weekInMilliseconds: number = dayInMilliseconds * 7;
   const events: Event[] = db
     .get("events")
-    .filter((e) => e.date < today && e.date < dayZero)
+    .filter((e) => e.date <= today && e.date >= dayZero)
     .value();
   const weeks: number[] = [dayZero];
   for (let i = dayZero + weekInMilliseconds; i <= today; i += weekInMilliseconds) {
     if (new Date(i).getHours() != 0) {
-      weeks.push(new Date(i + dayInMilliseconds).setHours(0,0,0,0));
+      weeks.push(new Date(i + dayInMilliseconds).setHours(0, 0, 0, 0));
     } else {
       weeks.push(new Date(i).getTime());
     }
   }
-  const weekEvents = weeks.map((week, i) => {
-    const weekEvents2 = events.filter(e => e.date >= week && e.date < weeks[i + 1]);
-    return weekEvents2;
-  })
-  console.log(weekEvents);
+  // Check if there are missing days
+  if (weeks[weeks.length - 1] < today) {
+    weeks.push(new Date(weeks[weeks.length - 1] + weekInMilliseconds).getTime());
+  }
+  console.log(weeks);
+  const retentionArr: weeklyRetentionObject[] = [
+    {
+      registrationWeek: 0,
+      newUsers: events.filter(
+        (e: Event) => e.date >= weeks[0] && e.date < weeks[1] && e.name === "signup"
+      ).length,
+      weeklyRetention: [100],
+      start: new Date(weeks[0]).toLocaleDateString(),
+      end: new Date(weeks[1]).toLocaleDateString(),
+    },
+  ];
+  const aaaa: string[] = events
+    .filter((e: Event) => e.date >= weeks[0] && e.date < weeks[1] && e.name === "signup")
+    .map((e: Event) => e.distinct_user_id);
+    console.log("signups current week", aaaa);
+  const bbbb: string[] = events.filter(
+    (e: Event) => e.name === "login" && aaaa.includes(e.distinct_user_id)
+  ).map((e: Event) => e.distinct_user_id);
+  console.log("logins current week", bbbb);
+  const newArr = [];
+  let lastWeekSum = aaaa.length;
+  for (let j = 1; j < weeks.length; j++) {
+    let counter = 0;
+    for (let r = 0; r < aaaa.length; r++) {
+      if (bbbb.includes(aaaa[r])) {
+        counter++;
+      }
+    }
+    console.log(`the sum of users logged in of ${j} week is `, counter);
+    newArr.push((counter / lastWeekSum) * 100);
+    lastWeekSum = counter;
+    counter = 0;
+  }
+  console.log('percentage array preview', newArr);
+  
+  for (let i = 1; i < weeks.length; i++) {
+    const newUsers = events.filter(
+      (e: Event) => e.date >= weeks[i] && e.date < weeks[i + 1] && e.name === "signup"
+    );
+    const newUsersIds = newUsers.map((e: Event) => e.distinct_user_id);
+    // console.log(newUsersIds);
+    const backUsers = events.filter((e: Event) => e.date >= weeks[i + 1] && e.name === "login")
+      .length;
+    let tempRetentionObj: weeklyRetentionObject = {
+      registrationWeek: i,
+      newUsers: newUsers.length,
+      weeklyRetention: [100],
+      start: new Date(weeks[i]).toLocaleDateString(),
+      end: new Date(weeks[i + 1]).toLocaleDateString(),
+    };
+    console.log(retentionArr);
+  }
 });
 
-router.get('/:eventId',(req : Request, res : Response) => {
-  res.send('/:eventId')
+router.get("/:eventId", (req: Request, res: Response) => {
+  res.send("/:eventId");
 });
 
 router.post("/", (req: Request, res: Response) => {
@@ -295,22 +346,20 @@ router.post("/", (req: Request, res: Response) => {
   res.send(newEvent);
 });
 
-router.get('/chart/os/:time',(req: Request, res: Response) => {
-  res.send('/chart/os/:time')
-})
+router.get("/chart/os/:time", (req: Request, res: Response) => {
+  res.send("/chart/os/:time");
+});
 
-  
-router.get('/chart/pageview/:time',(req: Request, res: Response) => {
-  res.send('/chart/pageview/:time')
-})
+router.get("/chart/pageview/:time", (req: Request, res: Response) => {
+  res.send("/chart/pageview/:time");
+});
 
-router.get('/chart/timeonurl/:time',(req: Request, res: Response) => {
-  res.send('/chart/timeonurl/:time')
-})
+router.get("/chart/timeonurl/:time", (req: Request, res: Response) => {
+  res.send("/chart/timeonurl/:time");
+});
 
-router.get('/chart/geolocation/:time',(req: Request, res: Response) => {
-  res.send('/chart/geolocation/:time')
-})
-
+router.get("/chart/geolocation/:time", (req: Request, res: Response) => {
+  res.send("/chart/geolocation/:time");
+});
 
 export default router;
