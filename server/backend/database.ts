@@ -863,5 +863,20 @@ export const getTransactionsBy = (key: string, value: string) =>
 /* istanbul ignore next */
 export const getTransactionsByUserId = (userId: string) => getTransactionsBy("receiverId", userId);
 
+export const formatDate = (date: Date | number): string => {
+  if (typeof date === "number") date = new Date(date);
+  const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+  const month = date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+export const getStartOfDay = (dateNow: number): number => {
+  let year: number = new Date(dateNow).getFullYear();
+  let day: number = new Date(dateNow).getDate();
+  let month: number = new Date(dateNow).getMonth() + 1;
+  const startOfDay = new Date(`${year}/${month}/${day}`);
+  return startOfDay.getTime();
+};
 
 export default db;
