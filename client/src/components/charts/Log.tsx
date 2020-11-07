@@ -16,20 +16,20 @@ const Log: React.FC = () => {
 
   useEffect(() => {
     const params = {
-        sort: sort,
-          ...(type !== undefined ? { type: type } : {}),
-          ...(browser !== undefined ? { browser: browser } : {}),
-          ...(search.length > 0 ? { search: search } : {}),
-          ...(offset !== 0 ? { offset: offset } : {}),
-    }
+      sort: sort,
+      ...(type !== undefined ? { type: type } : {}),
+      ...(browser !== undefined ? { browser: browser } : {}),
+      ...(search.length > 0 ? { search: search } : {}),
+      ...(offset !== 0 ? { offset: offset } : {}),
+    };
     const fetchData = async () => {
-      const { data: sessionByDay } = await axios.get(`http://localhost:3001/events/all-filtered`, {
+      const { data: sessionsByDay } = await axios.get(`http://localhost:3001/events/all-filtered`, {
         params: {
-          ...params
+          ...params,
         },
       });
-      setEvents(sessionByDay.events);
-      setMore(sessionByDay.more);
+      setEvents(sessionsByDay.events);
+      setMore(sessionsByDay.more);
     };
     fetchData();
   }, [sort, type, browser, search, offset]);
@@ -106,7 +106,10 @@ const Log: React.FC = () => {
         value={offset}
         onChange={(e) => handleOffsetChange(+e.target.value)}
       ></input>
-      {/* <div style="height:700px;overflow:auto;">
+      <div style={{height:'300px', width:'800px', border:'1px solid #ccc', overflow:'auto'}}>
+        {/* {events.map(e => )} */}
+      </div>
+      {/* <div style={{height:'700px', overflow:'auto'}}>
     <InfiniteScroll
         pageStart={0}
         loadMore={loadFunc}
@@ -114,7 +117,7 @@ const Log: React.FC = () => {
         loader={<div className="loader" key={0}>Loading ...</div>}
         useWindow={false}
     >
-        {items}
+        {events}
     </InfiniteScroll>
 </div> */}
     </div>

@@ -258,80 +258,54 @@ router.get("/week", (req: Request, res: Response) => {
 });
 
 router.get("/retention", (req: Request, res: Response) => {
-  let dayZero: number = +req.query.dayZero;
-  dayZero = new Date(dayZero).setHours(0, 0, 0, 0);
-  const today: number = new Date().setHours(0, 0, 0, 0);
+  const formatDate = (date: Date | number): string => {
+    if (typeof date === "number") date = new Date(date);
+    const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+    const month = date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+  
+  const { dayZero } = req.query;
   const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
   const weekInMilliseconds: number = dayInMilliseconds * 7;
-  const events: Event[] = db
-    .get("events")
-    .filter((e) => e.date <= today && e.date >= dayZero)
-    .value();
-  const weeks: number[] = [dayZero];
-  for (let i = dayZero + weekInMilliseconds; i <= today; i += weekInMilliseconds) {
-    if (new Date(i).getHours() != 0) {
-      weeks.push(new Date(i + dayInMilliseconds).setHours(0, 0, 0, 0));
-    } else {
-      weeks.push(new Date(i).getTime());
+  const allEvents: Event[] = db.get("events").value();
+  const signupArray = allEvents.filter((event: Event) => event.name === "signup");
+  const retentionArr: weeklyRetentionObject[] = [];
+  const today: number = new Date().setHours(0, 0, 0, 0);
+  const dayZeroDate: Date = new Date(new Date(+dayZero).toDateString());
+  let index = 0;
+  for (let i = dayZeroDate.getTime(); i <= today; i += weekInMilliseconds) {
+    const registrationWeek: number = index;
+    const signupUserIds: string[] = signupArray
+      .filter((event) => event.date >= i && event.date < i + weekInMilliseconds)
+      .map((event) => event.distinct_user_id);
+    const newUsers: number = signupArray.filter(
+      (event) => event.date >= i && event.date < i + weekInMilliseconds
+    ).length;
+    const weeklyRetention: number[] = [100];
+    for (let j = i + weekInMilliseconds; j <= today; j += weekInMilliseconds) {
+      const loginArray: Event[] = allEvents.filter(
+        (event) => event.name === "login" && event.date >= j && event.date < j + weekInMilliseconds
+      );
+      let weeklyLogin: number = 0;
+      signupUserIds.forEach((id) => {
+        if (loginArray.find((event) => event.distinct_user_id === id)) {
+          weeklyLogin++;
+        }
+      });
+      const percentage: number = Math.round((weeklyLogin / newUsers) * 100);
+      weeklyRetention.push(percentage);
     }
+    const start: string = formatDate(i);
+    const end: string =
+      i + weekInMilliseconds - 1 > today
+        ? formatDate(today)
+        : formatDate(i + weekInMilliseconds - 1);
+    retentionArr.push({ registrationWeek, newUsers, weeklyRetention, start, end });
+    index++;
   }
-  // Check if there are missing days
-  if (weeks[weeks.length - 1] < today) {
-    weeks.push(new Date(weeks[weeks.length - 1] + weekInMilliseconds).getTime());
-  }
-  console.log(weeks);
-  const retentionArr: weeklyRetentionObject[] = [
-    {
-      registrationWeek: 0,
-      newUsers: events.filter(
-        (e: Event) => e.date >= weeks[0] && e.date < weeks[1] && e.name === "signup"
-      ).length,
-      weeklyRetention: [100],
-      start: new Date(weeks[0]).toLocaleDateString(),
-      end: new Date(weeks[1]).toLocaleDateString(),
-    },
-  ];
-  const aaaa: string[] = events
-    .filter((e: Event) => e.date >= weeks[0] && e.date < weeks[1] && e.name === "signup")
-    .map((e: Event) => e.distinct_user_id);
-    console.log("signups current week", aaaa);
-  const bbbb: string[] = events.filter(
-    (e: Event) => e.name === "login" && aaaa.includes(e.distinct_user_id)
-  ).map((e: Event) => e.distinct_user_id);
-  console.log("logins current week", bbbb);
-  const newArr = [];
-  let lastWeekSum = aaaa.length;
-  for (let j = 1; j < weeks.length; j++) {
-    let counter = 0;
-    for (let r = 0; r < aaaa.length; r++) {
-      if (bbbb.includes(aaaa[r])) {
-        counter++;
-      }
-    }
-    console.log(`the sum of users logged in of ${j} week is `, counter);
-    newArr.push((counter / lastWeekSum) * 100);
-    lastWeekSum = counter;
-    counter = 0;
-  }
-  console.log('percentage array preview', newArr);
-  
-  for (let i = 1; i < weeks.length; i++) {
-    const newUsers = events.filter(
-      (e: Event) => e.date >= weeks[i] && e.date < weeks[i + 1] && e.name === "signup"
-    );
-    const newUsersIds = newUsers.map((e: Event) => e.distinct_user_id);
-    // console.log(newUsersIds);
-    const backUsers = events.filter((e: Event) => e.date >= weeks[i + 1] && e.name === "login")
-      .length;
-    let tempRetentionObj: weeklyRetentionObject = {
-      registrationWeek: i,
-      newUsers: newUsers.length,
-      weeklyRetention: [100],
-      start: new Date(weeks[i]).toLocaleDateString(),
-      end: new Date(weeks[i + 1]).toLocaleDateString(),
-    };
-    console.log(retentionArr);
-  }
+  res.send(retentionArr);
 });
 
 router.get("/:eventId", (req: Request, res: Response) => {
