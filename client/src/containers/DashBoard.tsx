@@ -1,10 +1,11 @@
 import React from "react";
 import { Interpreter } from "xstate";
 import { AuthMachineContext, AuthMachineEvents } from "../machines/authMachine";
-import SessionsDays from "../components/charts/SessionsDays";
-import SessionsHours from "../components/charts/SessionsHours";
-import Map from '../components/charts/Map';
-import Log from '../components/charts/Log';
+import SessionsDays from "components/charts/SessionsDays";
+import SessionsHours from "components/charts/SessionsHours";
+import Map from 'components/charts/Map';
+import Log from 'components/charts/Log';
+import RetentionCohort from 'components/charts/RetentionCohort';
 
 export interface Props {
   authService: Interpreter<AuthMachineContext, any, AuthMachineEvents, any>;
@@ -17,6 +18,7 @@ const DashBoard: React.FC = () => {
       <SessionsDays />
       <SessionsHours />
       <Map />
+      <RetentionCohort />
       <Log />
     </div>
   );

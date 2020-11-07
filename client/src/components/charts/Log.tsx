@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 import axios from "axios";
-import { eventName, browser } from "models";
+import { eventName, browser, Event } from "models";
 
 type sort = "+date" | "-date";
 
@@ -107,7 +107,9 @@ const Log: React.FC = () => {
         onChange={(e) => handleOffsetChange(+e.target.value)}
       ></input>
       <div style={{height:'300px', width:'800px', border:'1px solid #ccc', overflow:'auto'}}>
-        {/* {events.map(e => )} */}
+        {events.map((e: Event) => <div>
+          User {e.name}
+        </div>)}
       </div>
       {/* <div style={{height:'700px', overflow:'auto'}}>
     <InfiniteScroll

@@ -3,10 +3,10 @@ import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
 import axios from "axios";
 
 const SessionsHours: React.FC = () => {
-    const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
+  const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
 
-    const [sessions, setSessions] = useState([]);
-    const [firstDate, setFirstDate] = useState<Date>(new Date());
+  const [sessions, setSessions] = useState([]);
+  const [firstDate, setFirstDate] = useState<Date>(new Date());
 
   useEffect(() => {
     const fetchData = async () => {
