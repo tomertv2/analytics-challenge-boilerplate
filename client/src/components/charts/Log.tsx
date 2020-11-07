@@ -2,8 +2,40 @@ import React, { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import axios from "axios";
 import { eventName, browser, Event } from "models";
+import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
+import Typography from "@material-ui/core/Typography";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Avatar from '@material-ui/core/Avatar';
 
 type sort = "+date" | "-date";
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      width: "100%",
+    },
+    heading: {
+      flexBasis: "33.33%",
+      flexShrink: 0,
+    },
+    secondaryHeading: {
+      fontSize: theme.typography.pxToRem(15),
+      color: theme.palette.text.secondary,
+    },
+  })
+);
+
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
 const Log: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -13,6 +45,8 @@ const Log: React.FC = () => {
   const [browser, setBrowser] = useState<browser | undefined>(undefined);
   const [search, setSearch] = useState<string>("");
   const [offset, setOffset] = useState<number>(10);
+
+  const classes = useStyles();
 
   const fetchData = async (setter: number) => {
     const { data: sessionsByDay } = await axios.get(`http://localhost:3001/events/all-filtered`, {
@@ -29,8 +63,8 @@ const Log: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchData(10)
-}, [sort, type, browser, search])
+    fetchData(10);
+  }, [sort, type, browser, search]);
 
   const handleSearchChange = (value: string): void => {
     setSearch(value);
@@ -67,10 +101,10 @@ const Log: React.FC = () => {
     }
   };
 
-  const handleNext = () =>{
+  const handleNext = () => {
     fetchData(offset + 10);
     setOffset((value) => value + 10);
-}
+  };
 
   return (
     <div>
@@ -99,11 +133,6 @@ const Log: React.FC = () => {
         <option value="ie">Internet Explorer</option>
         <option value="other">other</option>
       </select>
-      {/* <div style={{height:'300px', width:'800px', border:'1px solid #ccc', overflow:'auto'}}>
-        {events.map((e: Event) => <div>
-          User {e.name}
-        </div>)}
-      </div> */}
       <InfiniteScroll
         dataLength={events.length}
         next={handleNext}
@@ -116,13 +145,27 @@ const Log: React.FC = () => {
         }
         height={"50vh"}
       >
-        {events.map((event: Event) => {
-          return (
-            <div style={{ display: "flex", flexDirection: "row", border: "1px solid black" }}>
-              <h4 style={{ marginLeft: "3px" }}>{`user ID: ${event.distinct_user_id}`}</h4>
-            </div>
-          );
-        })}
+        {events.map((event: Event) => (
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
+              <Avatar style={{backgroundColor: getRandomColor()}}>{' '}</Avatar>
+              <Typography >Event {event._id}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <div>
+                <div>Event name: {event.name}</div>
+                <div>OS: {event.os}</div>
+                <div>Browser: {event.browser}</div>
+                <div>User Id: {event.distinct_user_id}</div>
+                <div>Come from: {event.url}</div>
+              </div>
+            </AccordionDetails>
+          </Accordion>
+        ))}
       </InfiniteScroll>
     </div>
   );
