@@ -6,7 +6,7 @@ import SessionsHours from "components/charts/SessionsHours";
 import Map from 'components/charts/Map';
 import Log from 'components/charts/Log';
 import RetentionCohort from 'components/charts/RetentionCohort';
-import UrlPie from 'components/charts/UrlPie';
+import MyPie from 'components/charts/MyPie';
 
 export interface Props {
   authService: Interpreter<AuthMachineContext, any, AuthMachineEvents, any>;
@@ -21,7 +21,8 @@ const DashBoard: React.FC = () => {
       <Map />
       <RetentionCohort />
       <Log />
-      <UrlPie />
+      <MyPie typeOfPie='url' />
+      <MyPie typeOfPie='os' />
     </div>
   );
 };
