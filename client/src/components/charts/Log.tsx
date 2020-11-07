@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import InfiniteScroll from "react-infinite-scroller";
+import InfiniteScroll from "react-infinite-scroll-component";
 import axios from "axios";
 import { eventName, browser, Event } from "models";
 
@@ -12,27 +12,25 @@ const Log: React.FC = () => {
   const [type, setType] = useState<eventName | undefined>(undefined);
   const [browser, setBrowser] = useState<browser | undefined>(undefined);
   const [search, setSearch] = useState<string>("");
-  const [offset, setOffset] = useState<number>(0);
+  const [offset, setOffset] = useState<number>(10);
+
+  const fetchData = async (setter: number) => {
+    const { data: sessionsByDay } = await axios.get(`http://localhost:3001/events/all-filtered`, {
+      params: {
+        sort: sort,
+        ...(type !== undefined ? { type: type } : {}),
+        ...(browser !== undefined ? { browser: browser } : {}),
+        ...(search.length > 0 ? { search: search } : {}),
+        offset: setter,
+      },
+    });
+    setEvents(sessionsByDay.events);
+    setMore(sessionsByDay.more);
+  };
 
   useEffect(() => {
-    const params = {
-      sort: sort,
-      ...(type !== undefined ? { type: type } : {}),
-      ...(browser !== undefined ? { browser: browser } : {}),
-      ...(search.length > 0 ? { search: search } : {}),
-      ...(offset !== 0 ? { offset: offset } : {}),
-    };
-    const fetchData = async () => {
-      const { data: sessionsByDay } = await axios.get(`http://localhost:3001/events/all-filtered`, {
-        params: {
-          ...params,
-        },
-      });
-      setEvents(sessionsByDay.events);
-      setMore(sessionsByDay.more);
-    };
-    fetchData();
-  }, [sort, type, browser, search, offset]);
+    fetchData(10)
+}, [sort, type, browser, search])
 
   const handleSearchChange = (value: string): void => {
     setSearch(value);
@@ -69,9 +67,10 @@ const Log: React.FC = () => {
     }
   };
 
-  const handleOffsetChange = (value: number): void => {
-    setOffset(value);
-  };
+  const handleNext = () =>{
+    fetchData(offset + 10);
+    setOffset((value) => value + 10);
+}
 
   return (
     <div>
@@ -100,28 +99,31 @@ const Log: React.FC = () => {
         <option value="ie">Internet Explorer</option>
         <option value="other">other</option>
       </select>
-      <input
-        type="number"
-        min="0"
-        value={offset}
-        onChange={(e) => handleOffsetChange(+e.target.value)}
-      ></input>
-      <div style={{height:'300px', width:'800px', border:'1px solid #ccc', overflow:'auto'}}>
+      {/* <div style={{height:'300px', width:'800px', border:'1px solid #ccc', overflow:'auto'}}>
         {events.map((e: Event) => <div>
           User {e.name}
         </div>)}
-      </div>
-      {/* <div style={{height:'700px', overflow:'auto'}}>
-    <InfiniteScroll
-        pageStart={0}
-        loadMore={loadFunc}
-        hasMore={true || false}
-        loader={<div className="loader" key={0}>Loading ...</div>}
-        useWindow={false}
-    >
-        {events}
-    </InfiniteScroll>
-</div> */}
+      </div> */}
+      <InfiniteScroll
+        dataLength={events.length}
+        next={handleNext}
+        hasMore={more}
+        loader={<h4>Loading...</h4>}
+        endMessage={
+          <p style={{ textAlign: "center" }}>
+            <b>You have seen it all</b>
+          </p>
+        }
+        height={"50vh"}
+      >
+        {events.map((event: Event) => {
+          return (
+            <div style={{ display: "flex", flexDirection: "row", border: "1px solid black" }}>
+              <h4 style={{ marginLeft: "3px" }}>{`user ID: ${event.distinct_user_id}`}</h4>
+            </div>
+          );
+        })}
+      </InfiniteScroll>
     </div>
   );
 };
