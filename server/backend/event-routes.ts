@@ -52,9 +52,15 @@ router.get("/all-filtered", (req: Request, res: Response) => {
   }
   if (qFilter.search) {
     const searchRegex: RegExp = RegExp(qFilter.search, "ig");
-    filteredEvents = filteredEvents.filter((e) =>
-      Object.values(e).find((value) => searchRegex.test(value))
-    );
+    filteredEvents = filteredEvents.filter((e) => {
+      const date: number = e.date;
+      return (
+        Object.values(e)
+          // error occurred (after test passed) so the solution is to not filter date
+          .filter((value) => value !== date)
+          .find((value) => searchRegex.test(value))
+      );
+    });
   }
   if (qFilter.offset) {
     const originalLength: number = filteredEvents.value().length;
@@ -265,34 +271,33 @@ router.get("/retention", (req: Request, res: Response) => {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   };
-  
-  const { dayZero } = req.query;
+
   const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
   const weekInMilliseconds: number = dayInMilliseconds * 7;
+  const dayZero = +req.query.dayZero;
+  const dayZeroDate: Date = new Date(new Date(dayZero).toDateString());
   const allEvents: Event[] = db.get("events").value();
-  const signupArray = allEvents.filter((event: Event) => event.name === "signup");
+  const signupArr: Event[] = allEvents.filter((event: Event) => event.name === "signup");
   const retentionArr: weeklyRetentionObject[] = [];
   const today: number = new Date().setHours(0, 0, 0, 0);
-  const dayZeroDate: Date = new Date(new Date(+dayZero).toDateString());
   let index = 0;
+
   for (let i = dayZeroDate.getTime(); i <= today; i += weekInMilliseconds) {
     const registrationWeek: number = index;
-    const signupUserIds: string[] = signupArray
+    const signupUserIds: string[] = signupArr
       .filter((event) => event.date >= i && event.date < i + weekInMilliseconds)
       .map((event) => event.distinct_user_id);
-    const newUsers: number = signupArray.filter(
+    const newUsers: number = signupArr.filter(
       (event) => event.date >= i && event.date < i + weekInMilliseconds
     ).length;
     const weeklyRetention: number[] = [100];
     for (let j = i + weekInMilliseconds; j <= today; j += weekInMilliseconds) {
-      const loginArray: Event[] = allEvents.filter(
+      const loginArr: Event[] = allEvents.filter(
         (event) => event.name === "login" && event.date >= j && event.date < j + weekInMilliseconds
       );
       let weeklyLogin: number = 0;
       signupUserIds.forEach((id) => {
-        if (loginArray.find((event) => event.distinct_user_id === id)) {
-          weeklyLogin++;
-        }
+        loginArr.find((event) => event.distinct_user_id === id) && weeklyLogin++;
       });
       const percentage: number = Math.round((weeklyLogin / newUsers) * 100);
       weeklyRetention.push(percentage);
