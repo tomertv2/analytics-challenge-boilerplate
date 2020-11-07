@@ -32,8 +32,6 @@ const RetentionCohort: React.FC = () => {
     fetchData();
   }, []);
 
-  console.log(retentionData);
-
   return (
     <div>
       <h1>Retention</h1>
