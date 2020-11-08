@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, Tooltip } from "recharts";
 import TextField from "@material-ui/core/TextField";
 import axios from "axios";
 import Header from 'components/styles/Header';
@@ -55,10 +55,12 @@ const SessionsDays: React.FC = () => {
           />
         </form>
       </Header>
-      <LineChart width={400} height={200} data={sessions}>
+      <LineChart width={500} height={200} data={sessions}>
         <Line type="monotone" dataKey="count" stroke="#8884d8" />
         <CartesianGrid stroke="#ccc" />
         <XAxis dataKey="date" />
+        <Legend layout="vertical" align="left" verticalAlign="middle" />
+        <Tooltip />
         <YAxis />
       </LineChart>
     </TileDiv>
