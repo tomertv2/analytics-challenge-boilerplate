@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import axios from "axios";
 import { eventName, browser, Event } from "models";
-import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
@@ -12,22 +11,6 @@ import Avatar from '@material-ui/core/Avatar';
 import TileDiv from "components/styles/TileDiv";
 
 type sort = "+date" | "-date";
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: "100%",
-    },
-    heading: {
-      flexBasis: "33.33%",
-      flexShrink: 0,
-    },
-    secondaryHeading: {
-      fontSize: theme.typography.pxToRem(15),
-      color: theme.palette.text.secondary,
-    },
-  })
-);
 
 function getRandomColor() {
   const letters = '0123456789ABCDEF';
@@ -46,8 +29,6 @@ const Log: React.FC = () => {
   const [browser, setBrowser] = useState<browser | undefined>(undefined);
   const [search, setSearch] = useState<string>("");
   const [offset, setOffset] = useState<number>(10);
-
-  const classes = useStyles();
 
   const fetchData = async (setter: number) => {
     const { data: sessionsByDay } = await axios.get(`http://localhost:3001/events/all-filtered`, {
