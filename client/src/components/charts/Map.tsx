@@ -26,10 +26,10 @@ export default function Map() {
     lng: -180,
   };
 
-  const options : {imagePath: string} = {
+  const options: { imagePath: string } = {
     imagePath:
-      'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
-  }
+      "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m",
+  };
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -61,13 +61,13 @@ export default function Map() {
           onLoad={onLoad}
           onUnmount={onUnmount}
         >
-            <MarkerClusterer options={options}>
-          {(clusterer) =>
-            locationsData.map((location: GeoLocation, i: number) => (
+          <MarkerClusterer options={options}>
+            {(clusterer) =>
+              locationsData.map((location: GeoLocation, i: number) => (
                 <Marker key={i} position={location.location} clusterer={clusterer} />
               ))
-          }
-            </MarkerClusterer>
+            }
+          </MarkerClusterer>
         </GoogleMap>
       </LoadScript>
     </TileDiv>

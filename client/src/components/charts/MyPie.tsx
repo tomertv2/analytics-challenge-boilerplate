@@ -40,7 +40,7 @@ const MyPie: React.FC<Props> = ({ typeOfPie }) => {
       const { data: events } = await axios.get(`http://localhost:3001/events/all`);
       const filteredEvents: string[] = events.map((e: Event) =>
         typeOfPie === "url"
-          ? e.url.replace('http://localhost3000', '')
+          ? e.url.replace("http://localhost3000", "")
           : typeOfPie === "os"
           ? e.os
           : typeOfPie === "browser" && e.browser

@@ -25,15 +25,15 @@ const DashBoard: React.FC = () => {
         <ErrorBoundary>
           <SessionsHours />
         </ErrorBoundary>
-          <ErrorBoundary>
-            <MyPie typeOfPie="url" />
-          </ErrorBoundary>
-          <ErrorBoundary>
-            <MyPie typeOfPie="os" />
-          </ErrorBoundary>
-          <ErrorBoundary>
-            <MyPie typeOfPie="browser" />
-          </ErrorBoundary>
+        <ErrorBoundary>
+          <MyPie typeOfPie="url" />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <MyPie typeOfPie="os" />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <MyPie typeOfPie="browser" />
+        </ErrorBoundary>
         <ErrorBoundary>
           <Map />
         </ErrorBoundary>

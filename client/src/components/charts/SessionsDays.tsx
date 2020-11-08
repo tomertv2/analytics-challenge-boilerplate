@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, Tooltip } from "recharts";
 import TextField from "@material-ui/core/TextField";
 import axios from "axios";
-import Header from 'components/styles/Header';
+import Header from "components/styles/Header";
 import TileDiv from "components/styles/TileDiv";
 
 const SessionsDays: React.FC = () => {
