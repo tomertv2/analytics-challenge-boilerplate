@@ -8,6 +8,7 @@ import Log from "components/charts/Log";
 import RetentionCohort from "components/charts/RetentionCohort";
 import MyPie from "components/charts/MyPie";
 import ErrorBoundary from "components/ErrorBoundary";
+import Tiles from "components/styles/Tiles";
 
 export interface Props {
   authService: Interpreter<AuthMachineContext, any, AuthMachineEvents, any>;
@@ -17,27 +18,32 @@ const DashBoard: React.FC = () => {
   return (
     <div>
       <h1>Analytics</h1>
-      <ErrorBoundary>
-        <SessionsDays />
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <SessionsHours />
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <Map />
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <RetentionCohort />
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <Log />
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <MyPie typeOfPie="url" />
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <MyPie typeOfPie="os" />
-      </ErrorBoundary>
+      <Tiles>
+        <ErrorBoundary>
+          <SessionsDays />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <SessionsHours />
+        </ErrorBoundary>
+          <ErrorBoundary>
+            <MyPie typeOfPie="url" />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <MyPie typeOfPie="os" />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <MyPie typeOfPie="browser" />
+          </ErrorBoundary>
+        <ErrorBoundary>
+          <Map />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <RetentionCohort />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <Log />
+        </ErrorBoundary>
+      </Tiles>
     </div>
   );
 };

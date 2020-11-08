@@ -9,6 +9,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { weeklyRetentionObject } from "models";
+import TileDiv from "components/styles/TileDiv";
 
 const useStyles = makeStyles({
   table: {
@@ -33,7 +34,7 @@ const RetentionCohort: React.FC = () => {
   }, []);
 
   return (
-    <div>
+    <TileDiv>
       <h1>Retention</h1>
       {retentionData.length > 0 ? (
         <TableContainer component={Paper}>
@@ -69,7 +70,7 @@ const RetentionCohort: React.FC = () => {
       ) : (
         <h1>no data to show</h1>
       )}
-    </div>
+    </TileDiv>
   );
 };
 

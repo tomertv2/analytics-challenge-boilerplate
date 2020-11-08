@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
 import axios from "axios";
+import Header from "components/styles/Header";
+import TextField from "@material-ui/core/TextField";
+import TileDiv from "components/styles/TileDiv";
 
 const SessionsHours: React.FC = () => {
   const dayInMilliseconds: number = 1000 * 60 * 60 * 24;
@@ -35,21 +38,29 @@ const SessionsHours: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Sessions (hours)</h1>
-      <input
-        type="date"
-        value={dateFormatter(firstDate)}
-        max={dateFormatter(new Date())}
-        onChange={(e) => handleDateChange(e.target.value)}
-      ></input>
-      <LineChart width={600} height={300} data={sessions}>
+    <TileDiv>
+      <Header>
+        <h1>Sessions (hours)</h1>
+        <form noValidate>
+          <TextField
+            className="date"
+            label="Date"
+            type="date"
+            value={dateFormatter(firstDate)}
+            onChange={(e) => handleDateChange(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </form>
+      </Header>
+      <LineChart width={400} height={200} data={sessions}>
         <Line type="monotone" dataKey="count" stroke="#8884d8" />
         <CartesianGrid stroke="#ccc" />
         <XAxis dataKey="hour" />
         <YAxis />
       </LineChart>
-    </div>
+    </TileDiv>
   );
 };
 

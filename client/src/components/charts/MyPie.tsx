@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Event } from "models";
-import { PieChart, Pie, Tooltip } from "recharts";
+import { PieChart, Pie, Tooltip, Cell, Legend } from "recharts";
+import TileDiv from "components/styles/TileDiv";
 
 type counterObj = {
   name: string;
@@ -32,11 +33,17 @@ const counter = (data: string[]) => {
 const MyPie: React.FC<Props> = ({ typeOfPie }) => {
   const [counts, setCounts] = useState<counterObj[]>([]);
 
+  const colors = ["#FF6633", "#FFB399", "#FF33FF", "#FFFF99", "#00B3E6", "#E6B333"];
+
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
       const { data: events } = await axios.get(`http://localhost:3001/events/all`);
       const filteredEvents: string[] = events.map((e: Event) =>
-        typeOfPie === "url" ? e.url : typeOfPie === "os" && e.os
+        typeOfPie === "url"
+          ? e.url.replace('http://localhost3000', '')
+          : typeOfPie === "os"
+          ? e.os
+          : typeOfPie === "browser" && e.browser
       );
       setCounts(counter(filteredEvents));
       console.log(counter(filteredEvents));
@@ -45,21 +52,18 @@ const MyPie: React.FC<Props> = ({ typeOfPie }) => {
   }, []);
 
   return (
-    <div>
-      <h1>{typeOfPie.toUpperCase()} Pie</h1>
-      <PieChart width={730} height={250}>
-        <Pie
-          data={counts}
-          dataKey="count"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          outerRadius={50}
-          fill="#8884d8"
-        />
+    <TileDiv>
+      <h1>{typeOfPie} Pie</h1>
+      <PieChart width={300} height={200}>
+        <Pie data={counts} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={50} label>
+          {counts.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={colors[index]} />
+          ))}
+        </Pie>
         <Tooltip />
+        <Legend layout="vertical" align="left" verticalAlign="middle" />
       </PieChart>
-    </div>
+    </TileDiv>
   );
 };
 

@@ -2,12 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { GoogleMap, LoadScript, Marker, MarkerClusterer } from "@react-google-maps/api";
 import { Event, GeoLocation } from "models";
 import axios from "axios";
+import TileDiv from "components/styles/TileDiv";
 
 const containerStyle: {
   width: string;
   height: string;
 } = {
-  width: "800px",
+  width: "850px",
   height: "500px",
 };
 
@@ -50,7 +51,7 @@ export default function Map() {
   }, []);
 
   return (
-    <div>
+    <TileDiv>
       <h1>Events on map</h1>
       <LoadScript googleMapsApiKey="AIzaSyD6fexKCtUQ5zLj2TEaOkf_EQstH0qLu-k">
         <GoogleMap
@@ -69,6 +70,6 @@ export default function Map() {
             </MarkerClusterer>
         </GoogleMap>
       </LoadScript>
-    </div>
+    </TileDiv>
   );
 }

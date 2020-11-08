@@ -9,6 +9,7 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Avatar from '@material-ui/core/Avatar';
+import TileDiv from "components/styles/TileDiv";
 
 type sort = "+date" | "-date";
 
@@ -107,7 +108,7 @@ const Log: React.FC = () => {
   };
 
   return (
-    <div>
+    <TileDiv>
       <h1>Events Log</h1>
       <input
         type="text"
@@ -167,7 +168,7 @@ const Log: React.FC = () => {
           </Accordion>
         ))}
       </InfiniteScroll>
-    </div>
+    </TileDiv>
   );
 };
 

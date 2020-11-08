@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
+import TextField from "@material-ui/core/TextField";
 import axios from "axios";
+import Header from 'components/styles/Header';
+import TileDiv from "components/styles/TileDiv";
 
 const SessionsDays: React.FC = () => {
   const [sessions, setSessions] = useState([]);
@@ -36,21 +39,29 @@ const SessionsDays: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Sessions (days)</h1>
-      <input
-        type="date"
-        value={dateFormatter(date)}
-        max={dateFormatter(new Date())}
-        onChange={(e) => handleDateChange(e.target.value)}
-      ></input>
-      <LineChart width={600} height={300} data={sessions}>
+    <TileDiv>
+      <Header>
+        <h1>Sessions (days)</h1>
+        <form noValidate>
+          <TextField
+            className="date"
+            label="Date"
+            type="date"
+            value={dateFormatter(date)}
+            onChange={(e) => handleDateChange(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </form>
+      </Header>
+      <LineChart width={400} height={200} data={sessions}>
         <Line type="monotone" dataKey="count" stroke="#8884d8" />
         <CartesianGrid stroke="#ccc" />
         <XAxis dataKey="date" />
         <YAxis />
       </LineChart>
-    </div>
+    </TileDiv>
   );
 };
 
